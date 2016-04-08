@@ -25,7 +25,8 @@ setup(
     url='https://pagure.io/pag',
     license='GPLv3+',
     classifiers=[
-        # TODO --
+        "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+        "Programming Language :: Python :: 3 :: Only",
     ],
     install_requires=requires,
     test_suite='nose.collector',
