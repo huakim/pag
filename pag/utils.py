@@ -18,10 +18,17 @@ def die(msg, code=1):
     sys.exit(code)
 
 
+def in_git_repo():
+    # TODO -- would be smarter to look "up" the tree, too.
+    if not os.path.exists('.git') or not os.path.isdir('.git'):
+        return None
+    return os.getcwd().split('/')[-1]
+
+
 def assert_local_repo(func):
     @functools.wraps(func)
     def inner(*args, **kwargs):
-        if not os.path.exists('.git') and not os.path.isdir('.git'):
+        if not in_git_repo():
             die("fatal:  Not a git repository")
         return func(*args, **kwargs)
     return inner

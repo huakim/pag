@@ -1,0 +1,6 @@
+bs4
+click
+requests
+pyyaml
+libpagure
+python-fedora
