@@ -1,2 +1,3 @@
 *.pyc
 pag.egg-info
+dist
