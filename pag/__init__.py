@@ -1,2 +1,2 @@
 __all__ = ['app']
-import app
+from . import app
