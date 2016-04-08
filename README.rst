@@ -7,6 +7,7 @@ Usage
 -----
 
 ::
+
     $ pag --help
     Usage: pag [OPTIONS] COMMAND [ARGS]...
 
