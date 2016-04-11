@@ -25,7 +25,7 @@ setup(
     url='https://pagure.io/pag',
     license='GPLv3+',
     classifiers=[
-        "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Programming Language :: Python :: 3 :: Only",
     ],
     install_requires=requires,
