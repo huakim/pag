@@ -12,6 +12,7 @@ __all__ = [
 
 from .commands import create
 from .commands import clone
+from .commands import fork
 from .commands import remote
 
 

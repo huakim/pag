@@ -23,7 +23,8 @@ def create(conf, name, description):
     if not client.is_logged_in:
         password = getpass.getpass("FAS password for %r" % conf['username'])
         client.login(username=conf['username'], password=password)
-    client.create(name, description)
+    url = client.create(name, description)
+    click.echo("Created %s" % url)
 
     local_repo = in_git_repo()
     if local_repo is None or local_repo != name:
