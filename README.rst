@@ -33,7 +33,13 @@ Or you can clone a fork::
 
 ----
 
-When already in a cloned repo, you can easily add remotes of other forks to collaborate::
+After you clone a repo, you can fork it on pagure.io and adjust your local `remote` settings::
+
+    ❯ pag fork
+
+----
+
+If you want to add the remotes of other forks, that's easy too.  Just do it by username::
 
     ❯ cd koji/
     ❯ pag remote add ausil
@@ -43,6 +49,7 @@ When already in a cloned repo, you can easily add remotes of other forks to coll
     ❯ git pull ausil master
 
 ----
+
 
 ``pag`` provides a convenience command for creating new projects::
 
