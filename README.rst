@@ -1,7 +1,9 @@
 pag
 ===
 
-Command line tool for interacting with https://pagure.io
+`pag` helps you win at `pagure.io <https://pagure.io>`_.
+
+Intended to mimic the `hub <https://github.com/github/hub>`_ cli tool for `github.com <https://github.com>`_.
 
 Usage
 -----
