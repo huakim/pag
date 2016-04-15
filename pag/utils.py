@@ -4,6 +4,7 @@ import subprocess as sp
 import sys
 
 import click
+import requests
 import yaml
 
 
@@ -41,6 +42,31 @@ def assert_local_repo(func):
             die("fatal:  Not a git repository")
         return func(*args, **kwargs)
     return inner
+
+
+def get_default_upstream_branch(name):
+    url = 'https://pagure.io/api/0/projects'
+    response = requests.get(url, params=dict(pattern=name, fork=False))
+    if not bool(response):
+        raise IOError("Failed to talk to %r %r", (url, response))
+    data = response.json()
+    projects = data['projects']
+    if not projects:
+        raise ValueError("No such project %r" % name)
+    if len(projects) > 1:
+        raise ValueError("More than one project called %r found "
+                         "(%i of them, in fact)." % (name, len(projects)))
+    project = projects[0]
+    return project['default_branch']
+
+
+def get_current_local_branch():
+    code, stdout, stderr = run(['git', 'branch', '--contains'])
+    if code != 0:
+        raise ValueError("Unable to determine branch."
+                         "\nstdout: %s\nstderr: %s" % (stdout, stderr))
+    branch = stdout.split(maxsplit=1)[1].strip().decode('utf-8')
+    return branch
 
 
 def repo_url(name, ssh=False, git=False, domain='pagure.io'):
