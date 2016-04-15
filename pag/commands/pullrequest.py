@@ -49,7 +49,10 @@ def pullrequest(conf, base, head):
         return '# ' + line
 
     log = '\n'.join([modify(line) for line in log.split('\n')])
-    edited = click.edit("\n\n".join([HEADER, MARKER, log]))
+    edited = click.edit(
+        "\n\n".join([HEADER, MARKER, log]),
+        env=dict(VIMINIT='set filetype="gitcommit"'),
+    )
     title, comment = edited.split('\n', 1)
     if not title:
         click.echo("Aborting due to empty pull request message.")
