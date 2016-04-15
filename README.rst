@@ -1,7 +1,7 @@
 pag
 ===
 
-`pag` helps you win at `pagure.io <https://pagure.io>`_.
+``pag`` helps you win at `pagure.io <https://pagure.io>`_.
 
 Intended to mimic the `hub <https://github.com/github/hub>`_ cli tool for `github.com <https://github.com>`_.
 
