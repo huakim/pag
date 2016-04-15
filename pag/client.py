@@ -2,6 +2,7 @@ import bs4
 
 import fedora.client
 
+from pag.utils import repo_url
 
 class PagureException(Exception):
     pass
