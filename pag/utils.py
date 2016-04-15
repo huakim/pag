@@ -15,7 +15,7 @@ def run(cmd, echo=True, graceful=True):
     click.echo('  $ ' + " ".join(cmd))
     proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
     output, _ = proc.communicate()
-    output = stdout.decode('utf-8')
+    output = output.decode('utf-8')
     if echo:
         click.echo(output)
     if not graceful and proc.returncode != 0:
@@ -61,12 +61,8 @@ def get_default_upstream_branch(name):
 
 
 def get_current_local_branch():
-    code, stdout, stderr = run(['git', 'branch', '--contains'])
-    if code != 0:
-        raise ValueError("Unable to determine branch."
-                         "\nstdout: %s\nstderr: %s" % (stdout, stderr))
-    branch = stdout.split(maxsplit=1)[1].strip().decode('utf-8')
-    return branch
+    code, stdout = run(['git', 'branch', '--contains'])
+    return stdout.split(maxsplit=1)[1].strip()
 
 
 def repo_url(name, ssh=False, git=False, domain='pagure.io'):
