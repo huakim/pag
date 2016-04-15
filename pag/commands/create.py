@@ -29,9 +29,9 @@ def create(conf, name, description):
     local_repo = in_git_repo()
     if local_repo is None or local_repo != name:
         url = repo_url(name, ssh=True, git=True)
-        run('git clone %s %s' % (url, name.split('/')[-1]))
+        run(['git', 'clone', url, name.split('/')[-1]])
     else:
         url = repo_url(name, ssh=True, git=True)
         name = name.split('/')[0]
-        run('git remote add %s %s' % (name, url))
-        run('git remote add %s %s' % ('origin', url))
+        run(['git', 'remote', 'add', name, url])
+        run(['git', 'remote', 'add', 'origin', url])

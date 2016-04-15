@@ -1,5 +1,6 @@
 import functools
 import os
+import subprocess as sp
 import sys
 
 import click
@@ -8,9 +9,17 @@ import yaml
 
 CONF_FILE = os.path.expanduser('~/.config/pag')
 
-def run(cmd):
-    click.echo('  $ ' + cmd)
-    return os.system(cmd)
+
+def run(cmd, echo=True, graceful=True):
+    click.echo('  $ ' + " ".join(cmd))
+    proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
+    output, _ = proc.communicate()
+    output = stdout.decode('utf-8')
+    if echo:
+        click.echo(output)
+    if not graceful and proc.returncode != 0:
+        sys.exit(1)
+    return proc.returncode, output
 
 
 def die(msg, code=1):

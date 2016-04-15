@@ -28,4 +28,4 @@ def add(name):
     repo = in_git_repo()
     url = repo_url(name + '/' + repo, ssh=True, git=True)
     name = name.split('/')[0]
-    return run('git remote add %s %s' % (name, url))
+    return run(['git', 'remote', 'add', name, url])

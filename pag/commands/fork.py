@@ -30,4 +30,4 @@ def fork(conf):
     name = username + '/' + name
     url = repo_url(name, ssh=True, git=True)
     name = name.split('/')[0]
-    run('git remote add %s %s' % (name, url))
+    run(['git', 'remote', 'add', name, url])
