@@ -51,6 +51,9 @@ def pullrequest(conf, base, head):
     log = '\n'.join([modify(line) for line in log.split('\n')])
     edited = click.edit("\n\n".join([HEADER, MARKER, log]))
     title, comment = edited.split('\n', 1)
+    if not title:
+        click.echo("Aborting due to empty pull request message.")
+        sys.exit(1)
     comment = comment.split(MARKER)[0]
     comment = comment.strip()
 
