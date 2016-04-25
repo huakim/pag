@@ -11,11 +11,26 @@ from pag.utils import (
     get_default_upstream_branch,
     get_current_local_branch,
     run,
+    die,
 )
 from pag.client import client
 
 HEADER = "Pull request title goes here."
 MARKER = "# All lines below this marker are ignored."
+
+
+def split_input(branch, default_repo):
+    tokens = branch.split(':')
+    if len(tokens) > 2:
+        die("%r is a malformed repo:branch expression." % branch)
+    elif len(tokens) == 1:
+        repo, branch = default_repo, tokens[0]
+    elif len(tokens) == 2:
+        repo, branch = tokens
+        repo = repo + '/' + default_repo
+    else:
+        raise RuntimeError('Should not be possible to get here...')
+    return repo, branch
 
 
 @app.command('pull-request')
@@ -34,9 +49,15 @@ def pullrequest(conf, base, head):
             click.echo("Failed to find default upstream branch for %r" % name)
             click.echo("Please specify a base branch explicitly.")
             sys.exit(1)
+    else:
+        name, base = split_input(base, name)
 
     if head is None:
         head = get_current_local_branch()
+    else:
+        name, head = split_input(head, name)
+        if '/' in name:
+            name = 'fork/' + name
 
     cmd = ['git', 'log', '{base}..{head}'.format(base=base, head=head)]
     _, log = run(cmd, echo=False)
