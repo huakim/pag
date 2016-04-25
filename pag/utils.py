@@ -72,7 +72,10 @@ def repo_url(name, ssh=False, git=False, domain='pagure.io'):
         prefix = 'https://'
 
     if '/' in name:
-        suffix = 'forks/%s' % name
+        if git:
+            suffix = 'forks/%s' % name
+        else:
+            suffix = 'fork/%s' % name
     else:
         suffix = '%s' % name
 
