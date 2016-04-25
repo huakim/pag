@@ -10,4 +10,4 @@ from pag.utils import (
 @click.argument('name')
 def clone(name):
     url = repo_url(name, ssh=True, git=True)
-    run('git clone %s %s' % (url, name.split('/')[-1]))
+    run(['git', 'clone', url, name.split('/')[-1]])
