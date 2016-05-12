@@ -86,7 +86,7 @@ def repo_url(name, ssh=False, git=False, domain='pagure.io'):
 
 
 def create_config():
-    username = raw_input("FAS username:  ")
+    username = input("FAS username:  ")
     conf = dict(
         username=username,
     )
