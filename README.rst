@@ -56,3 +56,10 @@ If you want to add the remotes of other forks, that's easy too.  Just do it by u
 ``pag`` provides a convenience command for creating new projects::
 
     ❯ pag create factory2 "Ostensibly better than factory version 1"
+
+
+----
+
+To enable bash completion, add the following to your ``.bashrc``::
+
+    eval "$(_PAG_COMPLETE=source pag)"
