@@ -51,6 +51,20 @@ def assert_local_repo(func):
     return inner
 
 
+def eager_command(func):
+    """Decorator for an option callback that should abort man command.
+
+    Useful when an option completely changes the execution flow.
+    """
+    @functools.wraps(func)
+    def inner(ctx, param, value):
+        if not value or ctx.resilient_parsing:
+            return
+        func(ctx)
+        ctx.exit()
+    return inner
+
+
 def get_default_upstream_branch(name):
     url = 'https://pagure.io/api/0/projects'
     response = requests.get(url, params=dict(pattern=name, fork=False))

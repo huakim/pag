@@ -38,6 +38,7 @@ from .commands import fork
 from .commands import remote
 from .commands import pullrequest
 from .commands import gitaliasing
+from .commands import review
 
 if __name__ == '__main__':
     app()
