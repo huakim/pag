@@ -7,6 +7,13 @@ import click
 import requests
 import yaml
 
+try:
+    from colorama import Style
+    DIM = Style.DIM
+    RESET = Style.RESET_ALL
+except ImportError:
+    DIM = RESET = ''
+
 
 CONF_FILE = os.path.expanduser('~/.config/pag')
 
@@ -17,7 +24,7 @@ def run(cmd, echo=True, graceful=True):
     output, _ = proc.communicate()
     output = output.decode('utf-8')
     if echo:
-        click.echo(output)
+        click.echo(DIM + output + RESET)
     if not graceful and proc.returncode != 0:
         sys.exit(1)
     return proc.returncode, output
