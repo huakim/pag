@@ -1,3 +1,5 @@
+import re
+
 import bs4
 
 import fedora.client
@@ -53,6 +55,39 @@ class Pagure(fedora.client.OpenIdBaseClient):
                                   'creating project: %r.  Sent %r' % (
                                       response, data))
         return repo_url(name)
+
+    def create_issue(self, repo, title, description, private=False):
+        if not self.is_logged_in:
+            raise PagureException('Not logged in.')
+
+        url = self.base_url + '/' + repo + '/new_issue'
+        response = self._session.get(url)
+        if not bool(response):
+            raise PagureException("Couldn't get form to get "
+                                  "csrf token %r" % response)
+
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        data = {
+            'csrf_token' : soup.find(id='csrf_token').attrs['value'],
+            'title': title,
+            'issue_content': description,
+            'private': private
+        }
+
+        response = self._session.post(url, data=data)
+        if not bool(response):
+            del data['csrf_token']
+            raise PagureException('Bad status code from pagure when '
+                                  'forking project: %r.  Sent %r' % (
+                                      response, data))
+
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        response_title = soup.title.string
+        match = re.match(r'Issue #(?P<issue_id>\d+):.*', response_title)
+        issue_id = match.group('issue_id')
+        issue_url = self.base_url + '/' + repo + '/issue/' + issue_id
+        return issue_url
+
 
     def fork(self, name):
         if not self.is_logged_in:
