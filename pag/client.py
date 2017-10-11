@@ -88,6 +88,34 @@ class Pagure(fedora.client.OpenIdBaseClient):
         issue_url = self.base_url + '/' + repo + '/issue/' + issue_id
         return issue_url
 
+    def upload(self, repo, filepath):
+        if not self.is_logged_in:
+            raise PagureException('Not logged in.')
+
+        url = self.base_url + '/' + repo + '/upload'
+        response = self._session.get(url)
+        if not bool(response):
+            raise PagureException("Couldn't get form to get "
+                                  "csrf token %r" % response)
+
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        data = {
+            'csrf_token': soup.find(id='csrf_token').attrs['value'],
+        }
+        files = {
+            'filestream': open(filepath, 'rb')
+        }
+        response = self._session.post(url, data=data, files=files)
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        alert = soup.find(class_="alert")
+        if 'alert-info' in alert.attrs['class']:
+            # Not an error -> the upload was successful.
+            return None
+        # Filter out only text elements from the alert (throwing away the close
+        # button).
+        text = ''.join(str(c) for c in alert.children
+                       if isinstance(c, bs4.element.NavigableString))
+        return text.strip()
 
     def fork(self, name):
         if not self.is_logged_in:
