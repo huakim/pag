@@ -13,7 +13,7 @@ from setuptools import setup, find_packages
 long_description = ''
 requires = []
 
-version = '0.6'
+version = '0.7'
 
 setup(
     name='pag',
