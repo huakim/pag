@@ -6,8 +6,11 @@ from pag.utils import (
     run,
 )
 
+
 @app.command()
 @click.argument('name')
-def clone(name):
-    url = repo_url(name, ssh=True, git=True)
+@click.option('--anonymous', '-a', is_flag=True)
+def clone(name, anonymous):
+    use_ssh = False if anonymous else True
+    url = repo_url(name, ssh=use_ssh, git=True)
     run(['git', 'clone', url, name.split('/')[-1]])
