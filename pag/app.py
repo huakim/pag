@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import click
 
 
@@ -41,6 +39,3 @@ from .commands import pullrequest
 from .commands import gitaliasing
 from .commands import review
 from .commands import upload
-
-if __name__ == '__main__':
-    app()
