@@ -82,8 +82,11 @@ def get_default_upstream_branch(name):
 
 
 def get_current_local_branch():
-    code, stdout = run(['git', 'branch', '--contains'])
-    return stdout.split(maxsplit=1)[1].strip()
+    _, stdout = run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+    branch = stdout.strip()
+    if branch == 'HEAD':
+        raise RuntimeError('Repo in detached HEAD state.')
+    return branch
 
 
 def repo_url(name, ssh=False, git=False, domain='pagure.io'):
