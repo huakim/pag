@@ -18,12 +18,13 @@ except ImportError:
 CONF_FILE = os.path.expanduser('~/.config/pag')
 
 
-def run(cmd, echo=True, graceful=True):
-    click.echo('  $ ' + " ".join(cmd))
+def run(cmd, echo=True, graceful=True, silent=False):
+    if not silent:
+        click.echo('  $ ' + " ".join(cmd))
     proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
     output, _ = proc.communicate()
     output = output.decode('utf-8')
-    if echo:
+    if echo and not silent:
         click.echo(DIM + output + RESET)
     if not graceful and proc.returncode != 0:
         sys.exit(1)
@@ -65,20 +66,21 @@ def eager_command(func):
     return inner
 
 
-def get_default_upstream_branch(name):
-    url = 'https://pagure.io/api/0/projects'
-    response = requests.get(url, params=dict(pattern=name, fork=False))
-    if not bool(response):
-        raise IOError("Failed to talk to %r %r", (url, response))
-    data = response.json()
-    projects = data['projects']
-    if not projects:
-        raise ValueError("No such project %r" % name)
-    if len(projects) > 1:
-        raise ValueError("More than one project called %r found "
-                         "(%i of them, in fact)." % (name, len(projects)))
-    project = projects[0]
-    return project['default_branch']
+def get_default_upstream_branch():
+    """The default branch is whatever HEAD points to in the remote repo.
+    Usually the main repo will be either `upstream` or `origin`, so try both.
+    Returns ``None`` if no default branch could be found.
+    """
+    # TODO We should instead use `git ls-remote --symref REMOTE_URL HEAD`, but
+    # that does not currently work.
+    #   https://pagure.io/pagure/issue/2955
+    for remote in ('upstream', 'origin'):
+        ref = '%s/HEAD' % remote
+        ret, stdout = run(['git', 'rev-parse', '--abbrev-ref', ref], silent=True)
+        if ret == 0:
+            real_ref = stdout.strip()
+            assert real_ref.startswith('%s/' % remote)
+            return real_ref[len(remote) + 1:]
 
 
 def get_current_local_branch():

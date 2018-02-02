@@ -8,12 +8,16 @@ import unittest
 from pag import utils
 
 
-class TestGetCurrentBranch(unittest.TestCase):
+class GitTestCase(unittest.TestCase):
+    """
+    A base class for tests that need a git repo. It creates a temporary repo
+    with a single commit for each test and changes to that directory.
+    """
 
-    def cmd(self, cmd, *args, **kwargs):
+    def cmd(self, cmd, cwd=None, *args, **kwargs):
         print('$ %s' % ' '.join(shlex.quote(x) for x in cmd))
         cp = subprocess.run(cmd, *args,
-                            cwd=self.repo,
+                            cwd=cwd or self.repo,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
                             universal_newlines=True,
@@ -33,6 +37,55 @@ class TestGetCurrentBranch(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.repo)
+
+
+class TestGetDefaultBranch(GitTestCase):
+    """
+    This test treats the inherited repo as upstream and clones it into a
+    separate directory, in which it runs the actual function. It can check out
+    a different branch in the "upstream" repo and thus effectively change the
+    default branch.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.clone = tempfile.mkdtemp(prefix='cloned_repo_')
+
+    def tearDown(self):
+        super().tearDown()
+        shutil.rmtree(self.clone)
+
+    def _clone_to(self, remote, branch):
+        if branch != 'master':
+            self.cmd(['git', 'checkout', '-b', branch])
+        self.cmd(['git', 'clone', self.repo, self.clone, '-o', remote])
+        os.chdir(self.clone)
+
+    def test_origin_master(self):
+        self._clone_to('origin', 'master')
+
+        self.assertEqual(utils.get_default_upstream_branch(), 'master')
+
+    def test_origin_develop(self):
+        self._clone_to('origin', 'develop')
+
+        self.assertEqual(utils.get_default_upstream_branch(), 'develop')
+
+    def test_upstream_master(self):
+        self._clone_to('upstream', 'master')
+
+        self.assertEqual(utils.get_default_upstream_branch(), 'master')
+
+    def test_upstream_develop(self):
+        self._clone_to('upstream', 'develop')
+
+        self.assertEqual(utils.get_default_upstream_branch(), 'develop')
+
+    def test_no_remote(self):
+        self.assertEqual(utils.get_default_upstream_branch(), None)
+
+
+class TestGetCurrentBranch(GitTestCase):
 
     def test_single_branch(self):
         self.cmd(['git', 'checkout', '-b', 'test'])
