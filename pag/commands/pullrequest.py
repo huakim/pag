@@ -52,7 +52,7 @@ def pullrequest(conf, base, head):
 
     if base is None:
         try:
-            base = get_default_upstream_branch(name)
+            base = get_default_upstream_branch()
         except Exception:
             click.echo("Failed to find default upstream branch for %r" % name)
             click.echo("Please specify a base branch explicitly.")
