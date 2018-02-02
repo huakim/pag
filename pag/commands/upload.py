@@ -18,6 +18,7 @@ from pag.client import client
 @configured
 @assert_local_repo
 def upload(conf, tarball):
+    """Upload new file to releases."""
     name = in_git_repo()
     click.echo('Trying to upload %r' % tarball)
     if not client.is_logged_in:

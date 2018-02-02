@@ -35,10 +35,18 @@ def split_input(branch, default_repo):
 
 @app.command('pull-request')
 @assert_local_repo
-@click.option('-b', '--base')
+@click.option('-b', '--base', help='Branch to merge the changes in')
 @click.option('-h', '--head')
 @configured
 def pullrequest(conf, base, head):
+    """
+    Open a new pull request. Default behaviour is to open pull request from
+    current branch to default upstream branch (usually 'master' or 'develop').
+
+    The '--head' option can be used to specify other branch than the current
+    one. You can open a pull request from a fork using
+    'YOUR_USERNAME:BRANCH_NAME' as argument to '--head'.
+    """
 
     name = in_git_repo()
 
