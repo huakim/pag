@@ -91,19 +91,25 @@ def get_current_local_branch():
     return branch
 
 
-def repo_url(name, ssh=False, git=False, domain='pagure.io'):
+def repo_url(name, ssh=False, git=False, domain='pagure.io', force_no_fork=False):
+    """Generate a URL to a project.
+
+    :param ssh: whether to use ssh or https protocol
+    :param git: whether to append .git suffix
+    :param domain: Pagure instance we are interested in
+    :param force_no_fork: whether to check if the name could actually be a fork
+    """
     if ssh:
         prefix = 'ssh://git@'
     else:
         prefix = 'https://'
 
-    if '/' in name:
+    suffix = '%s' % name
+    if not force_no_fork and '/' in name:
         if git:
             suffix = 'forks/%s' % name
         else:
             suffix = 'fork/%s' % name
-    else:
-        suffix = '%s' % name
 
     if git:
         suffix = suffix + '.git'
