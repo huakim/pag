@@ -25,6 +25,7 @@ class GitTestCase(unittest.TestCase):
         print(cp.stdout)
 
     def setUp(self):
+        self.orig_path = os.getcwd()
         # Create git repository with some basic content
         self.repo = tempfile.mkdtemp(prefix='test_current_branch_')
         self.cmd(['git', 'init'])
@@ -37,6 +38,8 @@ class GitTestCase(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.repo)
+        # Change back to original working directory
+        os.chdir(self.orig_path)
 
 
 class TestGetDefaultBranch(GitTestCase):
