@@ -6,6 +6,7 @@ import fedora.client
 
 from pag.utils import repo_url
 
+
 class PagureException(Exception):
     pass
 
@@ -68,7 +69,7 @@ class Pagure(fedora.client.OpenIdBaseClient):
 
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         data = {
-            'csrf_token' : soup.find(id='csrf_token').attrs['value'],
+            'csrf_token': soup.find(id='csrf_token').attrs['value'],
             'title': title,
             'issue_content': description,
             'private': private
@@ -143,7 +144,7 @@ class Pagure(fedora.client.OpenIdBaseClient):
         return repo_url(name)
 
     def submit_pull_request(self, name, base, head, title, comment):
-        url = 'https://pagure.io/{name}/diff/{base}..{head}'
+        url = self.base_url + '/{name}/diff/{base}..{head}'
         url = url.format(name=name, base=base, head=head)
 
         response = self._session.get(url)
