@@ -152,3 +152,36 @@ class ReviewTest(unittest.TestCase):
              mock.call(['git', 'checkout', 'review/2344/1'], graceful=False),
              ])
         self.assertEqual(result.exit_code, 0)
+
+    @mock.patch('pag.commands.review.run')
+    @mock.patch('pag.commands.review.list_pull_requests', new=lambda _: LIST_RESPONSE['requests'])
+    @mock.patch('pag.commands.review.in_git_repo', new=lambda: 'pagure')
+    def test_cleanup_merged_branches(self, run):
+        run.return_value = (0, 'review/1/1\nreview/1/2\n')
+
+        result = self.runner.invoke(review, ['--cleanup'])
+
+        self.assertEqual(result.exit_code, 0)
+
+        self.assertEqual(
+            run.call_args_list,
+            [
+                mock.call(['git', 'branch', '--list', 'review/*'], echo=False),
+                mock.call(['git', 'branch', '-D', 'review/1/1', 'review/1/2']),
+            ])
+
+    @mock.patch('pag.commands.review.run')
+    @mock.patch('pag.commands.review.list_pull_requests', new=lambda _: LIST_RESPONSE['requests'])
+    @mock.patch('pag.commands.review.in_git_repo', new=lambda: 'pagure')
+    def test_keep_branch_for_opened_pr(self, run):
+        run.return_value = (0, 'review/2344/1\nreview/2344/2\n')
+
+        result = self.runner.invoke(review, ['--cleanup'])
+
+        self.assertEqual(result.exit_code, 0)
+
+        self.assertEqual(
+            run.call_args_list,
+            [
+                mock.call(['git', 'branch', '--list', 'review/*'], echo=False),
+            ])

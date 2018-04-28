@@ -18,12 +18,13 @@ except ImportError:
 CONF_FILE = os.path.expanduser('~/.config/pag')
 
 
-def run(cmd, echo=True, graceful=True):
-    click.echo('  $ ' + " ".join(cmd))
+def run(cmd, echo=True, graceful=True, silent=False):
+    if not silent:
+        click.echo('  $ ' + " ".join(cmd))
     proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
     output, _ = proc.communicate()
     output = output.decode('utf-8')
-    if echo:
+    if echo and not silent:
         click.echo(DIM + output + RESET)
     if not graceful and proc.returncode != 0:
         sys.exit(1)
@@ -65,40 +66,50 @@ def eager_command(func):
     return inner
 
 
-def get_default_upstream_branch(name):
-    url = 'https://pagure.io/api/0/projects'
-    response = requests.get(url, params=dict(pattern=name, fork=False))
-    if not bool(response):
-        raise IOError("Failed to talk to %r %r", (url, response))
-    data = response.json()
-    projects = data['projects']
-    if not projects:
-        raise ValueError("No such project %r" % name)
-    if len(projects) > 1:
-        raise ValueError("More than one project called %r found "
-                         "(%i of them, in fact)." % (name, len(projects)))
-    project = projects[0]
-    return project['default_branch']
+def get_default_upstream_branch():
+    """The default branch is whatever HEAD points to in the remote repo.
+    Usually the main repo will be either `upstream` or `origin`, so try both.
+    Returns ``None`` if no default branch could be found.
+    """
+    # TODO We should instead use `git ls-remote --symref REMOTE_URL HEAD`, but
+    # that does not currently work.
+    #   https://pagure.io/pagure/issue/2955
+    for remote in ('upstream', 'origin'):
+        ref = '%s/HEAD' % remote
+        ret, stdout = run(['git', 'rev-parse', '--abbrev-ref', ref], silent=True)
+        if ret == 0:
+            real_ref = stdout.strip()
+            assert real_ref.startswith('%s/' % remote)
+            return real_ref[len(remote) + 1:]
 
 
 def get_current_local_branch():
-    code, stdout = run(['git', 'branch', '--contains'])
-    return stdout.split(maxsplit=1)[1].strip()
+    _, stdout = run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
+    branch = stdout.strip()
+    if branch == 'HEAD':
+        raise RuntimeError('Repo in detached HEAD state.')
+    return branch
 
 
-def repo_url(name, ssh=False, git=False, domain='pagure.io'):
+def repo_url(name, ssh=False, git=False, domain='pagure.io', force_no_fork=False):
+    """Generate a URL to a project.
+
+    :param ssh: whether to use ssh or https protocol
+    :param git: whether to append .git suffix
+    :param domain: Pagure instance we are interested in
+    :param force_no_fork: whether to check if the name could actually be a fork
+    """
     if ssh:
         prefix = 'ssh://git@'
     else:
         prefix = 'https://'
 
-    if '/' in name:
+    suffix = '%s' % name
+    if not force_no_fork and '/' in name:
         if git:
             suffix = 'forks/%s' % name
         else:
             suffix = 'fork/%s' % name
-    else:
-        suffix = '%s' % name
 
     if git:
         suffix = suffix + '.git'

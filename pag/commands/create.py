@@ -18,6 +18,10 @@ from pag.client import client
 @click.confirmation_option(prompt="Are you sure you want to create a new repo?")
 @configured
 def create(conf, name, description):
+    """
+    Create a new repo. When run in an existing local git repository, this
+    command will also set up remotes.
+    """
 
     click.echo("Trying to create %r in pagure.io" % name)
     if not client.is_logged_in:

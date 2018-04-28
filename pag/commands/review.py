@@ -69,6 +69,23 @@ def get_local_branch(pr):
 
 
 @eager_command
+def cleanup_branches(ctx):
+    """Delete all branches that correspond to merged or closed pull requests.
+
+    This function never returns due to the decorator exiting the whole program.
+
+    :param ctx: Click context. Passed automatically by the decorator
+    """
+    repo = in_git_repo()
+    opened_requests = set(str(pr['id']) for pr in list_pull_requests(repo))
+
+    _, out = run(['git', 'branch', '--list', 'review/*'], echo=False)
+    branches = [b for b in out.split() if b.split('/', 3)[1] not in opened_requests]
+    if branches:
+        run(['git', 'branch', '-D'] + branches)
+
+
+@eager_command
 def list_pulls(ctx):
     """Print information about opened pull requests.
 
@@ -116,6 +133,11 @@ def open_current(ctx):
 @click.option('-l', '--list', is_flag=True, callback=list_pulls,
               expose_value=False, is_eager=True,
               help='List opened pull requests on this repo')
+@click.option('-c', '--cleanup', is_flag=True, callback=cleanup_branches,
+              expose_value=False, is_eager=True,
+              help='Delete branches corresponding to merged/closed pull '
+                   'requests. WARNING: This can potentially delete useful '
+                   'data!')
 @click.option('-o', '--open', is_flag=True, callback=open_current,
               expose_value=False, is_eager=True,
               help='Open currently reviewed PR in browser')
