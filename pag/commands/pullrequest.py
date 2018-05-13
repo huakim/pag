@@ -10,6 +10,9 @@ from pag.utils import (
     in_git_repo,
     get_default_upstream_branch,
     get_current_local_branch,
+    get_tracking_branch,
+    get_remote_url,
+    repo_url,
     run,
     die,
 )
@@ -33,6 +36,27 @@ def split_input(branch, default_repo):
     return repo, branch
 
 
+def guess_repo_name(default_repo, current_branch, username):
+    """Given a name of the main repo, current branch and a user name, try to
+    guess repo name where the branch is pushed. This is either the main repo,
+    or a fork. In order for this to work, the branch must be set as remote
+    tracking.
+
+    Returns name of the remote repo and name of the branch on the remote.
+    """
+    tracking = get_tracking_branch()
+    if not tracking:
+        return default_repo, current_branch
+    remote, branch = tracking
+
+    remote_url = get_remote_url(remote)
+    for r in (default_repo, '%s/%s' % (username, default_repo)):
+        if remote_url == repo_url(r, ssh=True, git=True):
+            return r, branch
+
+    return default_repo, current_branch
+
+
 @app.command('pull-request')
 @assert_local_repo
 @click.option('-b', '--base', help='Branch to merge the changes in')
@@ -44,11 +68,15 @@ def pullrequest(conf, base, head):
     current branch to default upstream branch (usually 'master' or 'develop').
 
     The '--head' option can be used to specify other branch than the current
-    one. You can open a pull request from a fork using
-    'YOUR_USERNAME:BRANCH_NAME' as argument to '--head'.
+    one. Note that the name in the remote repo is needed here. You can open a
+    pull request from a fork using 'YOUR_USERNAME:BRANCH_NAME' as argument to
+    '--head'. Alternatively you can push the branch with `-u` to make it track
+    the remote branch. In such case pag will automatically know to open the PR
+    from your fork.
     """
 
     name = in_git_repo()
+    username = conf['username']
 
     if base is None:
         try:
@@ -61,13 +89,16 @@ def pullrequest(conf, base, head):
         name, base = split_input(base, name)
 
     if head is None:
-        head = get_current_local_branch()
+        local_head = get_current_local_branch()
+        name, head = guess_repo_name(name, head, username)
     else:
         name, head = split_input(head, name)
-        if '/' in name:
-            name = 'fork/' + name
+        local_head = head
 
-    cmd = ['git', 'log', '{base}..{head}'.format(base=base, head=head)]
+    if '/' in name:
+        name = 'fork/' + name
+
+    cmd = ['git', 'log', '{base}..{head}'.format(base=base, head=local_head)]
     _, log = run(cmd, echo=False)
 
     def modify(line):
@@ -92,7 +123,6 @@ def pullrequest(conf, base, head):
     comment = comment.split(MARKER)[0]
     comment = comment.strip()
 
-    username = conf['username']
     if not client.is_logged_in:
         password = getpass.getpass("FAS password for %r" % username)
         client.login(username=username, password=password)

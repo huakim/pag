@@ -36,10 +36,20 @@ class GitTestCase(unittest.TestCase):
         # and chdir into it.
         os.chdir(self.repo)
 
+        # Prepare a directory for creating a clone
+        self.clone = tempfile.mkdtemp(prefix='cloned_repo_')
+
     def tearDown(self):
         shutil.rmtree(self.repo)
+        shutil.rmtree(self.clone)
         # Change back to original working directory
         os.chdir(self.orig_path)
+
+    def _clone_to(self, remote, branch):
+        if branch != 'master':
+            self.cmd(['git', 'checkout', '-b', branch])
+        self.cmd(['git', 'clone', self.repo, self.clone, '-o', remote])
+        os.chdir(self.clone)
 
 
 class TestGetDefaultBranch(GitTestCase):
@@ -49,20 +59,6 @@ class TestGetDefaultBranch(GitTestCase):
     a different branch in the "upstream" repo and thus effectively change the
     default branch.
     """
-
-    def setUp(self):
-        super().setUp()
-        self.clone = tempfile.mkdtemp(prefix='cloned_repo_')
-
-    def tearDown(self):
-        super().tearDown()
-        shutil.rmtree(self.clone)
-
-    def _clone_to(self, remote, branch):
-        if branch != 'master':
-            self.cmd(['git', 'checkout', '-b', branch])
-        self.cmd(['git', 'clone', self.repo, self.clone, '-o', remote])
-        os.chdir(self.clone)
 
     def test_origin_master(self):
         self._clone_to('origin', 'master')
@@ -111,3 +107,37 @@ class TestGetCurrentBranch(GitTestCase):
 
         with self.assertRaises(RuntimeError):
             utils.get_current_local_branch()
+
+
+class TestGetTrackingBranch(GitTestCase):
+
+    def setUp(self):
+        super(TestGetTrackingBranch, self).setUp()
+        self._clone_to('origin', 'master')
+
+    def get_test_not_tracking(self, mock_run):
+        self.cmd(['git', 'checkout', '-b', 'foo'], cwd=self.clone)
+        self.assertEqual(utils.get_tracking_branch(), None)
+
+    def test_with_tracking_branch(self):
+        self.cmd(['git', 'checkout', '-b', 'foo'], cwd=self.clone)
+        self.cmd(['git', 'push', '-u', 'origin', 'foo:bar'], cwd=self.clone)
+        self.assertEqual(utils.get_tracking_branch(), ('origin', 'bar'))
+
+    def test_with_tracking_branch_ahead(self):
+        self.cmd(['git', 'checkout', '-b', 'foo'], cwd=self.clone)
+        self.cmd(['git', 'push', '-u', 'origin', 'foo:bar'], cwd=self.clone)
+        self.cmd(['git', 'commit', '--allow-empty', '-m', 'Dummy commit'],
+                 cwd=self.clone)
+        self.assertEqual(utils.get_tracking_branch(), ('origin', 'bar'))
+
+
+class TestGetRemoteUrl(GitTestCase):
+
+    def test_no_remote(self):
+        self.assertEqual(utils.get_remote_url('origin'), None)
+
+    def test_with_remote(self):
+        self._clone_to('upstream', 'master')
+        os.chdir(self.clone)
+        self.assertEqual(utils.get_remote_url('upstream'), self.repo)

@@ -83,6 +83,26 @@ def get_default_upstream_branch():
             return real_ref[len(remote) + 1:]
 
 
+def get_tracking_branch():
+    """Get branch name and the name of the remote repo that this branch is
+    tracking.
+    """
+    _, output = run(['git', 'status', '-sb', '--porcelain'], silent=True)
+    try:
+        # Get first line, ... separates local and remote names
+        return tuple(output.splitlines()[0]
+                     .split(' ')[1]
+                     .split('...')[1]
+                     .split('/', 1))
+    except IndexError:
+        return None
+
+
+def get_remote_url(remote):
+    ret, output = run(['git', 'remote', 'get-url', remote], silent=True)
+    return output.strip() if ret == 0 else None
+
+
 def get_current_local_branch():
     _, stdout = run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
     branch = stdout.strip()
