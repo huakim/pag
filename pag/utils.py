@@ -151,7 +151,8 @@ def create_config():
 
 def load_config():
     with open(CONF_FILE, 'rb') as f:
-        return yaml.load(f.read().decode('utf-8'))
+        return yaml.safe_load(f.read().decode('utf-8'))
+
 
 def load_or_create_config():
     if not os.path.exists(CONF_FILE):
