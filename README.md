@@ -139,9 +139,9 @@ TODO:
 
 ## Credits
 
-Ralph Bean <rbean@redhat.com>
-Lubomír Sedlář <lubomir.sedlar@gmail.com>
-Haikel Guemar <hguemar@fedoraproject.org>
+Ralph Bean <rbean@redhat.com>  
+Lubomír Sedlář <lubomir.sedlar@gmail.com>  
+Haikel Guemar <hguemar@fedoraproject.org>  
 Tiago d'Almeida <tjamadeira@gmail.com>
 
 [License](./LICENSE) GNU GPL 3.0 &copy; 2016-2022
