@@ -69,10 +69,6 @@ Create an issue from the command line!
   $ pag create-issue --title "WIP: What about a new command" --description "Ideas for new commands" --private
 ```
 
-### Default
-
-> TODO
-
 ### Fork
 
 After you clone a repo, you can `fork` it on [pagure.io](https://pagure.io) and adjust your local `remote` settings:
@@ -143,7 +139,9 @@ TODO:
 
 ## Credits
 
-*Ralph Bean* as `ralph`  
-*Tiago d'Almeida* as `tjapro`
+Ralph Bean <rbean@redhat.com>
+Lubomír Sedlář <lubomir.sedlar@gmail.com>
+Haikel Guemar <hguemar@fedoraproject.org>
+Tiago d'Almeida <tjamadeira@gmail.com>
 
 [License](./LICENSE) GNU GPL 3.0 &copy; 2016-2022
