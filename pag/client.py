@@ -51,7 +51,7 @@ class Pagure(fedora.client.OpenIdBaseClient):
                                       action, response, data))
         return response
 
-    def create(self, name, description):
+    def create(self, name, description, **kwargs):
         if not self.is_logged_in:
             raise PagureException('Not logged in.')
         url = self.base_url + '/new'
@@ -60,11 +60,12 @@ class Pagure(fedora.client.OpenIdBaseClient):
             name=name,
             description=description,
         )
-
+        data.update(kwargs)
         self._post(url, data=data, action='creating project')
         return repo_url(name)
 
-    def create_issue(self, repo, title, description, private=False):
+    def create_issue(self, repo, title, description, private=False, 
+            **kwargs):
         if not self.is_logged_in:
             raise PagureException('Not logged in.')
 
@@ -85,7 +86,7 @@ class Pagure(fedora.client.OpenIdBaseClient):
         issue_url = self.base_url + '/' + repo + '/issue/' + issue_id
         return issue_url
 
-    def upload(self, repo, filepath):
+    def upload(self, repo, filepath, **kwargs):
         if not self.is_logged_in:
             raise PagureException('Not logged in.')
 
@@ -108,7 +109,7 @@ class Pagure(fedora.client.OpenIdBaseClient):
                        if isinstance(c, bs4.element.NavigableString))
         return text.strip()
 
-    def fork(self, name):
+    def fork(self, name, **kwargs):
         if not self.is_logged_in:
             raise PagureException('Not logged in.')
 
@@ -121,7 +122,8 @@ class Pagure(fedora.client.OpenIdBaseClient):
         self._post(url, data=data, action='forking project')
         return repo_url(name)
 
-    def submit_pull_request(self, name, base, head, title, comment):
+    def submit_pull_request(self, name, base, head, title, comment,
+            **kwargs):
         url = self.base_url + '/{name}/diff/{base}..{head}'
         url = url.format(name=name, base=base, head=head)
 

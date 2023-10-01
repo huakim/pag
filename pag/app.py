@@ -1,6 +1,5 @@
 import click
 
-
 class PassthroughGroup(click.Group):
     """This subclass adds two features
     - allow resolving command names given to the command-line to the closest
