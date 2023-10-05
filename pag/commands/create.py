@@ -11,7 +11,6 @@ from pag.utils import (
 )
 from pag.client import client
 
-print('funny')
 @app.command()
 @click.option('--namespace', help='Project Namespace')
 @click.option('--default_branch', help='Default Branch')
