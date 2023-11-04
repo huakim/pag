@@ -62,7 +62,7 @@ class Pagure(fedora.client.OpenIdBaseClient):
         )
         data.update(kwargs)
         self._post(url, data=data, action='creating project')
-        return repo_url(name)
+        return repo_url(name, namespace=kwargs.get('namespace'))
 
     def create_issue(self, repo, title, description, private=False, 
             **kwargs):
