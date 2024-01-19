@@ -16,8 +16,9 @@ def _check_repo(namespace, name):
 
 @app.command()
 @click.argument('name')
+@click.option('--namespace', help='Project Namespace')
 @click.option('--anonymous', '-a', is_flag=True)
-def clone(name, anonymous):
+def clone(name, anonymous, **kwargs):
     """
     Clone an existing repo. Use the '-a' option when you don't have commit
     access to the repository.
@@ -31,5 +32,5 @@ def clone(name, anonymous):
         force_no_fork = _check_repo(*name.split('/'))
 
     use_ssh = False if anonymous else True
-    url = repo_url(name, ssh=use_ssh, git=True, force_no_fork=force_no_fork)
+    url = repo_url(name, ssh=use_ssh, git=True, force_no_fork=force_no_fork, **kwargs)
     run(['git', 'clone', url, name.split('/')[-1]])
